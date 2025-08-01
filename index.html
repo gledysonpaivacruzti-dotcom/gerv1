@@ -1,0 +1,191 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Safeway Consultoria</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #0033cc;
+      --primary-light: #3366ff;
+      --text: #ffffff;
+      --text-dark: #1a1a1a;
+      --background: #f5f7fa;
+      --card-bg: #ffffff;
+      --border: #dce3ed;
+      --highlight: #fff3cd;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--primary);
+      color: var(--text);
+      margin: 0;
+      padding: 2rem;
+    }
+    .container {
+      max-width: 850px;
+      margin: auto;
+      background: var(--card-bg);
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      color: var(--text-dark);
+    }
+    h2 {
+      text-align: center;
+      color: var(--primary);
+      margin-bottom: 2rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    label {
+      font-weight: 600;
+      margin-top: 1rem;
+      display: block;
+    }
+    input[type="text"], select {
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    input[list] {
+      background-color: #f0f4ff;
+      border: 1px solid #c6d4f5;
+      border-radius: 0.6rem;
+      padding-left: 2.5rem;
+      background-image: url('data:image/svg+xml;utf8,<svg fill="%230033cc" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7zm0 9.5c-1.4 0-2.5-1.1-2.5-2.5S10.6 6.5 12 6.5s2.5 1.1 2.5 2.5S13.4 11.5 12 11.5z"/></svg>');
+      background-repeat: no-repeat;
+      background-position: 0.75rem center;
+      background-size: 1.25rem;
+      transition: border-color 0.2s;
+    }
+    input[list]:focus {
+      border-color: var(--primary);
+      outline: none;
+    }
+    .full-width { grid-column: 1 / -1; }
+    #descricao {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background-color: #f0f4fb;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      font-weight: 600;
+      white-space: normal;
+      word-break: break-word;
+      color: var(--text-dark);
+    }
+    #alerta {
+      margin-top: 1.5rem;
+      background-color: var(--highlight);
+      border: 1px solid #ffeeba;
+      color: #856404;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 500;
+    }
+    #alerta::before {
+      content: "⚠️";
+      font-size: 1.2rem;
+    }
+    button {
+      margin-top: 1.5rem;
+      width: 100%;
+      background-color: var(--text);
+      color: var(--primary);
+      border: 2px solid var(--primary);
+      padding: 0.9rem;
+      font-size: 1rem;
+      font-weight: bold;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+    button:hover {
+      background-color: var(--primary);
+      color: var(--text);
+    }
+    @media (max-width: 600px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+  <script src="cidadesUF.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h2>Safeway Consultoria</h2>
+    <div class="grid">
+      <div><label for="pontaA">Ponta A</label><input list="cidades" id="pontaA" name="pontaA" placeholder="Ex: Fortaleza" /></div>
+      <div><label for="pontaB">Ponta B</label><input list="cidades" id="pontaB" name="pontaB" placeholder="Ex: Teresina" /></div>
+      <datalist id="cidades"></datalist>
+      <div><label for="uf">UF</label><input type="text" id="uf" name="uf" readonly /></div>
+      <div><label for="backbone">Backbone</label><select id="backbone"><option value="DWDM">DWDM</option><option value="Metro">Metro</option></select></div>
+      <div><label for="evento">Tipo de Evento</label><select id="evento"><option value="RUP">Ruptura</option><option value="ATN">Atenuação</option><option value="IND">Indisponibilidade</option><option value="DEG">Degradação</option></select></div>
+      <div id="canal-container" style="display: none"><label for="canal">Canal Afetado</label><select id="canal"><script>for (let i = 20; i <= 60; i++) { document.write(`<option value="CH${i}">CH${i}</option>`); }</script></select></div>
+      <div><label for="via">Via</label><select id="via"><option value="ONLY">Only</option><option value="WORK">Work</option><option value="PROTECT">Protect</option></select></div>
+      <div><label for="parceiro">Parceiro</label><select id="parceiro"><option value="STAR1">STAR1</option><option value="TELFO">TELFO</option><option value="GIGA+">GIGA+</option><option value="MEGALINK">MEGALINK</option><option value="ONLINE">ONLINE</option></select></div>
+    </div>
+    <div id="alerta" class="full-width">Rompimento em trecho com RAMAN. O mesmo deve ser desligado para evitar danos ao equipamento.</div>
+    <div id="descricao"></div>
+    <button onclick="copiarDescricao()">📋 Copiar Descrição</button>
+
+    <div class="full-width" style="margin-top: 2rem;">
+      <h3 style="color: #0033cc;">📷 Parâmetros para medições em rompimento.</h3>
+      <img src="b33aa7df-3cb9-4059-8b5c-9e2ee8f09ebb.png" alt="Exemplo de Medição" style="max-width: 100%; border: 1px solid #ccc; border-radius: 8px;" />
+    </div>
+
+  </div>
+  <script>
+    const cidadesUFMap = {};
+    for (const [cidade, uf] of Object.entries(cidadesUF)) {
+      cidadesUFMap[cidade.toLowerCase()] = uf;
+      const option = document.createElement("option");
+      option.value = cidade;
+      document.getElementById("cidades").appendChild(option);
+    }
+    const campos = ["pontaA", "pontaB", "backbone", "evento", "canal", "via", "parceiro"];
+    campos.forEach(c => document.getElementById(c).addEventListener("input", gerarDescricao));
+    document.getElementById("evento").addEventListener("change", () => {
+      const isIND = document.getElementById("evento").value === "IND";
+      document.getElementById("canal-container").style.display = isIND ? "block" : "none";
+      gerarDescricao();
+    });
+    function gerarDescricao() {
+      let cidadeA = document.getElementById("pontaA").value.trim();
+      let cidadeB = document.getElementById("pontaB").value.trim();
+      const backbone = document.getElementById("backbone").value;
+      const evento = document.getElementById("evento").value;
+      const canal = document.getElementById("canal").value;
+      const via = document.getElementById("via").value;
+      const parceiro = document.getElementById("parceiro").value.toUpperCase();
+      if (!cidadeA || !cidadeB) return;
+      const cidades = [cidadeA, cidadeB].sort((a, b) => a.localeCompare(b));
+      const uf = cidadesUFMap[cidades[0].toLowerCase()] || "";
+      document.getElementById("uf").value = uf;
+      const normalize = c => c.toUpperCase().replace(/\s+/g, '_');
+      const cidadesDescr = `${normalize(cidades[0])}<>${normalize(cidades[1])}`;
+      let descricao = `${backbone}::${uf}::${evento}`;
+      if (evento === "IND") descricao += `::${canal}`;
+      descricao += `::${cidadesDescr}::${via}::${parceiro}`;
+      document.getElementById("descricao").textContent = descricao;
+    }
+    function copiarDescricao() {
+      const text = document.getElementById("descricao").textContent;
+      if (!text) return;
+      navigator.clipboard.writeText(text).then(() => alert("Descrição copiada!"));
+    }
+  </script>
+</body>
+</html>
