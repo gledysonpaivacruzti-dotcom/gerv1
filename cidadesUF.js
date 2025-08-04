@@ -3860,4 +3860,5 @@ const cidadesUF = {
 "Imperatriz": "MA",
 "Itaipava do Grajau": "MA",
 "Paraibano": "MA",
+"Alto Alegre do Maranhão": "MA",
 };
