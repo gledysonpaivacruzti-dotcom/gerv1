@@ -3861,4 +3861,12 @@ const cidadesUF = {
 "Itaipava do Grajau": "MA",
 "Paraibano": "MA",
 "Alto Alegre do Maranhão": "MA",
+  "Bom Jesus das Selvas": "MA",
+  "Riachão": "MA",
+  "Bom Sucesso": "MA",
+  "Central do Maranhão": "MA",
+  "Pinheiro": "MA",
+  "Bom Jardim": "MA",
+  "São Domingos do Maranhão": "MA",
+  
 };
