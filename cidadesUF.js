@@ -3868,5 +3868,6 @@ const cidadesUF = {
   "Pinheiro": "MA",
   "Bom Jardim": "MA",
   "São Domingos do Maranhão": "MA",
-  
+  "Morros": "MA",
+  "Massalina": "MA",
 };
