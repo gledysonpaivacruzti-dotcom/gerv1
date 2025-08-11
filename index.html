@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -126,8 +125,8 @@
 <body>
   <div class="container">
     <a href="https://safeway.net.br/" target="_blank">
-  <img src="safe.png" alt="safe" style="max-width: 30%; border-radius: 8px; display: block; margin: 0 auto;" />
-</a>
+      <img src="safe.png" alt="safe" style="max-width: 30%; border-radius: 8px; display: block; margin: 0 auto;" />
+    </a>
     <div class="grid">
       <div><label for="pontaA">Ponta A</label><input list="cidades" id="pontaA" name="pontaA" placeholder="Ex: Fortaleza" /></div>
       <div><label for="pontaB">Ponta B</label><input list="cidades" id="pontaB" name="pontaB" placeholder="Ex: Teresina" /></div>
@@ -138,6 +137,13 @@
       <div id="canal-container" style="display: none"><label for="canal">Canal Afetado</label><select id="canal"><script>for (let i = 20; i <= 60; i++) { document.write(`<option value="CH${i}">CH${i}</option>`); }</script></select></div>
       <div><label for="via">Via</label><select id="via"><option value="ONLY">Only</option><option value="WORK">Work</option><option value="PROTECT">Protect</option></select></div>
       <div><label for="parceiro">Parceiro</label><select id="parceiro"><option value="STAR1">STAR1</option><option value="TELFO">TELFO</option><option value="GIGA+">GIGA+</option><option value="MEGALINK">MEGALINK</option><option value="ONLINE">ONLINE</option><option value="LOOP TELECOM">LOOP TELECOM</option></select></div>
+      <div><label for="acionamento">Acionamento</label>
+        <select id="acionamento">
+          <option value="">Selecione</option>
+          <option value="REA">Reativo</option>
+          <option value="PRO">Proativo</option>
+        </select>
+      </div>
     </div>
     <div id="alerta" class="full-width">Rompimento em trecho com RAMAN. O mesmo deve ser desligado para evitar danos ao equipamento.</div>
     <div id="descricao"></div>
@@ -147,8 +153,8 @@
       <h3 style="color: #0033cc;">📷 Parâmetros para medições em rompimento.</h3>
       <img src="b33aa7df-3cb9-4059-8b5c-9e2ee8f09ebb.png" alt="Exemplo de Medição" style="max-width: 100%; border: 1px solid #ccc; border-radius: 8px;" />
     </div>
-
   </div>
+
   <script>
     const cidadesUFMap = {};
     for (const [cidade, uf] of Object.entries(cidadesUF)) {
@@ -157,13 +163,16 @@
       option.value = cidade;
       document.getElementById("cidades").appendChild(option);
     }
-    const campos = ["pontaA", "pontaB", "backbone", "evento", "canal", "via", "parceiro"];
+
+    const campos = ["pontaA", "pontaB", "backbone", "evento", "canal", "via", "parceiro", "acionamento"];
     campos.forEach(c => document.getElementById(c).addEventListener("input", gerarDescricao));
+
     document.getElementById("evento").addEventListener("change", () => {
       const isIND = document.getElementById("evento").value === "IND";
       document.getElementById("canal-container").style.display = isIND ? "block" : "none";
       gerarDescricao();
     });
+
     function gerarDescricao() {
       let cidadeA = document.getElementById("pontaA").value.trim();
       let cidadeB = document.getElementById("pontaB").value.trim();
@@ -172,17 +181,28 @@
       const canal = document.getElementById("canal").value;
       const via = document.getElementById("via").value;
       const parceiro = document.getElementById("parceiro").value.toUpperCase();
+      const acionamento = document.getElementById("acionamento").value; // PRO ou REA
+
       if (!cidadeA || !cidadeB) return;
+
       const cidades = [cidadeA, cidadeB].sort((a, b) => a.localeCompare(b));
       const uf = cidadesUFMap[cidades[0].toLowerCase()] || "";
       document.getElementById("uf").value = uf;
+
       const normalize = c => c.toUpperCase().replace(/\s+/g, '_');
       const cidadesDescr = `${normalize(cidades[0])}<>${normalize(cidades[1])}`;
-      let descricao = `${backbone}::${uf}::${evento}`;
-      if (evento === "IND") descricao += `::${canal}`;
-      descricao += `::${cidadesDescr}::${via}::${parceiro}`;
+
+      // Montagem com acionamento na frente (se selecionado)
+      let partes = [];
+      if (acionamento) partes.push(acionamento);
+      partes.push(backbone, uf, evento);
+      if (evento === "IND") partes.push(canal);
+      partes.push(cidadesDescr, via, parceiro);
+
+      const descricao = partes.join("::");
       document.getElementById("descricao").textContent = descricao;
     }
+
     function copiarDescricao() {
       const text = document.getElementById("descricao").textContent;
       if (!text) return;
