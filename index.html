@@ -33,11 +33,6 @@
       box-shadow: 0 10px 30px rgba(0,0,0,0.1);
       color: var(--text-dark);
     }
-    h2 {
-      text-align: center;
-      color: var(--primary);
-      margin-bottom: 2rem;
-    }
     .grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -67,10 +62,7 @@
       background-size: 1.25rem;
       transition: border-color 0.2s;
     }
-    input[list]:focus {
-      border-color: var(--primary);
-      outline: none;
-    }
+    input[list]:focus { border-color: var(--primary); outline: none; }
     .full-width { grid-column: 1 / -1; }
     #descricao {
       margin-top: 1.5rem;
@@ -95,10 +87,7 @@
       gap: 0.5rem;
       font-weight: 500;
     }
-    #alerta::before {
-      content: "⚠️";
-      font-size: 1.2rem;
-    }
+    #alerta::before { content: "⚠️"; font-size: 1.2rem; }
     button {
       margin-top: 1.5rem;
       width: 100%;
@@ -112,13 +101,14 @@
       cursor: pointer;
       transition: background 0.2s ease, color 0.2s ease;
     }
-    button:hover {
-      background-color: var(--primary);
-      color: var(--text);
+    button[disabled] {
+      background-color: #ccc;
+      color: #666;
+      border-color: #aaa;
+      cursor: not-allowed;
     }
-    @media (max-width: 600px) {
-      .grid { grid-template-columns: 1fr; }
-    }
+    button:hover:not([disabled]) { background-color: var(--primary); color: var(--text); }
+    @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
   </style>
   <script src="cidadesUF.js"></script>
 </head>
@@ -128,26 +118,37 @@
       <img src="safe.png" alt="safe" style="max-width: 30%; border-radius: 8px; display: block; margin: 0 auto;" />
     </a>
     <div class="grid">
-      <div><label for="pontaA">Ponta A</label><input list="cidades" id="pontaA" name="pontaA" placeholder="Ex: Fortaleza" /></div>
-      <div><label for="pontaB">Ponta B</label><input list="cidades" id="pontaB" name="pontaB" placeholder="Ex: Teresina" /></div>
+      <div id="pontaA-container"><label for="pontaA">Ponta A</label><input list="cidades" id="pontaA" placeholder="Ex: Fortaleza" /></div>
+      <div id="pontaB-container"><label for="pontaB">Ponta B</label><input list="cidades" id="pontaB" placeholder="Ex: Teresina" /></div>
+      <div id="pontaFalha-container" style="display:none"><label for="pontaFalha">Ponta de Falha</label><input list="cidades" id="pontaFalha" placeholder="Ex: Fortaleza" /></div>
+
       <datalist id="cidades"></datalist>
-      <div><label for="uf">UF</label><input type="text" id="uf" name="uf" readonly /></div>
+
+      <div><label for="uf">UF</label><input type="text" id="uf" readonly /></div>
       <div><label for="backbone">Backbone</label><select id="backbone"><option value="DWDM">DWDM</option><option value="METRO">METRO</option></select></div>
-      <div><label for="evento">Tipo de Evento</label><select id="evento"><option value="RUP">Ruptura</option><option value="ATN">Atenuação</option><option value="IND">Indisponibilidade</option><option value="DEG">Degradação</option></select></div>
-      <div id="canal-container" style="display: none"><label for="canal">Canal Afetado</label><select id="canal"><script>for (let i = 20; i <= 60; i++) { document.write(`<option value="CH${i}">CH${i}</option>`); }</script></select></div>
+      <div><label for="evento">Tipo de Evento</label>
+        <select id="evento">
+          <option value="RUP">Ruptura</option>
+          <option value="ATN">Atenuação</option>
+          <option value="IND">Indisponibilidade</option>
+          <option value="DEG">Degradação</option>
+          <option value="FDH">Falha de Hardware</option>
+          <option value="TPR">Temperatura</option>
+        </select>
+      </div>
+      <div id="canal-container" style="display:none"><label for="canal">Canal Afetado</label><select id="canal"><script>for(let i=20;i<=60;i++){document.write(`<option value="CH${i}">CH${i}</option>`);}</script></select></div>
       <div><label for="via">Via</label><select id="via"><option value="ONLY">Only</option><option value="WORK">Work</option><option value="PROTECT">Protect</option></select></div>
       <div><label for="parceiro">Parceiro</label><select id="parceiro"><option value="STAR1">STAR1</option><option value="TELFO">TELFO</option><option value="GIGA+">GIGA+</option><option value="MEGALINK">MEGALINK</option><option value="ONLINE">ONLINE</option><option value="LOOP TELECOM">LOOP TELECOM</option></select></div>
       <div><label for="acionamento">Acionamento</label>
         <select id="acionamento">
-          <option value="">Selecione</option>
           <option value="REA">Reativo</option>
-          <option value="PRO">Proativo</option>
+          <option value="PRO" selected>Proativo</option>
         </select>
       </div>
     </div>
     <div id="alerta" class="full-width">Rompimento em trecho com RAMAN. O mesmo deve ser desligado para evitar danos ao equipamento.</div>
     <div id="descricao"></div>
-    <button onclick="copiarDescricao()">📋 Copiar Descrição</button>
+    <button id="copiarBtn" onclick="copiarDescricao()" disabled>📋 Copiar Descrição</button>
 
     <div class="full-width" style="margin-top: 2rem;">
       <h3 style="color: #0033cc;">📷 Parâmetros para medições em rompimento.</h3>
@@ -155,59 +156,100 @@
     </div>
   </div>
 
-  <script>
-    const cidadesUFMap = {};
-    for (const [cidade, uf] of Object.entries(cidadesUF)) {
-      cidadesUFMap[cidade.toLowerCase()] = uf;
-      const option = document.createElement("option");
-      option.value = cidade;
-      document.getElementById("cidades").appendChild(option);
-    }
+<script>
+const cidadesUFMap = {};
+for (const [cidade, uf] of Object.entries(cidadesUF)) {
+  cidadesUFMap[cidade.toLowerCase()] = uf;
+  const option = document.createElement("option");
+  option.value = cidade;
+  document.getElementById("cidades").appendChild(option);
+}
 
-    const campos = ["pontaA", "pontaB", "backbone", "evento", "canal", "via", "parceiro", "acionamento"];
-    campos.forEach(c => document.getElementById(c).addEventListener("input", gerarDescricao));
+const campos = ["pontaA","pontaB","pontaFalha","backbone","evento","canal","via","parceiro","acionamento"];
+campos.forEach(id => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener("input", gerarDescricao);
+  el.addEventListener("change", gerarDescricao);
+});
 
-    document.getElementById("evento").addEventListener("change", () => {
-      const isIND = document.getElementById("evento").value === "IND";
-      document.getElementById("canal-container").style.display = isIND ? "block" : "none";
-      gerarDescricao();
-    });
+document.getElementById("evento").addEventListener("change", () => {
+  updateFieldVisibility();
+  gerarDescricao();
+});
 
-    function gerarDescricao() {
-      let cidadeA = document.getElementById("pontaA").value.trim();
-      let cidadeB = document.getElementById("pontaB").value.trim();
-      const backbone = document.getElementById("backbone").value;
-      const evento = document.getElementById("evento").value;
-      const canal = document.getElementById("canal").value;
-      const via = document.getElementById("via").value;
-      const parceiro = document.getElementById("parceiro").value.toUpperCase();
-      const acionamento = document.getElementById("acionamento").value; // PRO ou REA
+function isSingleCityEvent(evt) {
+  return evt === "TPR" || evt === "FDH";
+}
 
-      if (!cidadeA || !cidadeB) return;
+function updateFieldVisibility(){
+  const evento = document.getElementById("evento").value;
+  const isIND = evento === "IND";
+  const isSingle = isSingleCityEvent(evento);
 
-      const cidades = [cidadeA, cidadeB].sort((a, b) => a.localeCompare(b));
-      const uf = cidadesUFMap[cidades[0].toLowerCase()] || "";
-      document.getElementById("uf").value = uf;
+  document.getElementById("canal-container").style.display = isIND ? "block" : "none";
+  document.getElementById("pontaFalha-container").style.display = isSingle ? "block" : "none";
+  document.getElementById("pontaA-container").style.display = isSingle ? "none" : "block";
+  document.getElementById("pontaB-container").style.display = isSingle ? "none" : "block";
+}
 
-      const normalize = c => c.toUpperCase().replace(/\s+/g, '_');
-      const cidadesDescr = `${normalize(cidades[0])}<>${normalize(cidades[1])}`;
+function gerarDescricao(){
+  const backbone = document.getElementById("backbone").value;
+  const evento = document.getElementById("evento").value;
+  const via = document.getElementById("via").value;
+  const parceiro = document.getElementById("parceiro").value.toUpperCase();
+  const acionamento = document.getElementById("acionamento").value;
 
-      // Montagem com acionamento na frente (se selecionado)
-      let partes = [];
-      if (acionamento) partes.push(acionamento);
-      partes.push(backbone, uf, evento);
-      if (evento === "IND") partes.push(canal);
-      partes.push(cidadesDescr, via, parceiro);
+  const normalize = c => c.toUpperCase().replace(/\s+/g,'_');
 
-      const descricao = partes.join("::");
-      document.getElementById("descricao").textContent = descricao;
-    }
+  let partes = [];
+  let uf = "";
+  let descricao = "";
 
-    function copiarDescricao() {
-      const text = document.getElementById("descricao").textContent;
-      if (!text) return;
-      navigator.clipboard.writeText(text).then(() => alert("Descrição copiada!"));
-    }
-  </script>
+  if (isSingleCityEvent(evento)) {
+    const cidade = document.getElementById("pontaFalha").value.trim();
+    if (!cidade) { document.getElementById("descricao").textContent = ""; toggleBotao(false); return; }
+    uf = cidadesUFMap[cidade.toLowerCase()] || "";
+    document.getElementById("uf").value = uf;
+    const locSegment = normalize(cidade);
+    if (acionamento) partes.push(acionamento);
+    partes.push(backbone, uf, evento, locSegment, via, parceiro);
+  } else {
+    const cidadeA = document.getElementById("pontaA").value.trim();
+    const cidadeB = document.getElementById("pontaB").value.trim();
+    const canal = document.getElementById("canal").value;
+    if (!cidadeA || !cidadeB) { document.getElementById("descricao").textContent = ""; toggleBotao(false); return; }
+    const cidades = [cidadeA, cidadeB].sort((a,b)=>a.localeCompare(b));
+    uf = cidadesUFMap[cidades[0].toLowerCase()] || "";
+    document.getElementById("uf").value = uf;
+    const cidadesDescr = `${normalize(cidades[0])}<>${normalize(cidades[1])}`;
+    if (acionamento) partes.push(acionamento);
+    partes.push(backbone, uf, evento);
+    if (evento === "IND") partes.push(canal);
+    partes.push(cidadesDescr, via, parceiro);
+  }
+
+  descricao = partes.join("::");
+  document.getElementById("descricao").textContent = descricao;
+  toggleBotao(true);
+}
+
+function toggleBotao(enable){
+  document.getElementById("copiarBtn").disabled = !enable;
+}
+
+function copiarDescricao(){
+  const btn = document.getElementById("copiarBtn");
+  const text = document.getElementById("descricao").textContent;
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent = "✅ Copiado!";
+    setTimeout(()=> btn.textContent = "📋 Copiar Descrição", 2000);
+  });
+}
+
+updateFieldVisibility();
+gerarDescricao();
+</script>
 </body>
 </html>
