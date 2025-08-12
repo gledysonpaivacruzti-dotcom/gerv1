@@ -3029,7 +3029,7 @@ const cidadesUF = {
   "Santa Filomena": "PI",
   "Santa Gertrudes": "SP",
   "Santa Helena": "PB",
-  "Santa Ines": "PB",
+  "Santa Ines": "MA",
   "Santa Isabel": "SP",
   "Santa Isabel Do Ivai": "PR",
   "Santa Isabel Do Para": "PA",
