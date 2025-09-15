@@ -3870,4 +3870,5 @@ const cidadesUF = {
   "São Domingos do Maranhão": "MA",
   "Morros": "MA",
   "Massalina": "MA",
+  "Itapecuru-Mirim": "MA",
 };
