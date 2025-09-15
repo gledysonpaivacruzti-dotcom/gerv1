@@ -3871,4 +3871,5 @@ const cidadesUF = {
   "Morros": "MA",
   "Massalina": "MA",
   "Itapecuru-Mirim": "MA",
+  "Pedro Rosario": "MA",
 };
