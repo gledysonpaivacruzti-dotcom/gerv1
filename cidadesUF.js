@@ -3873,4 +3873,5 @@ const cidadesUF = {
   "Itapecuru-Mirim": "MA",
   "Pedro Rosario": "MA",
   "Santa Luzia do Paruá": "MA",
+  "São Bernardo": "MA",
 };
