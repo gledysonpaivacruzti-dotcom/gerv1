@@ -3874,4 +3874,5 @@ const cidadesUF = {
   "Pedro Rosario": "MA",
   "Santa Luzia do Paruá": "MA",
   "São Bernardo": "MA",
+"São Bento": "MA",
 };
