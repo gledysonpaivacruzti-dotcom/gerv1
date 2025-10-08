@@ -3875,4 +3875,5 @@ const cidadesUF = {
   "Santa Luzia do Paruá": "MA",
   "São Bernardo": "MA",
 "São Bento": "MA",
+  "Governador Nunes Freire": "MA",
 };
