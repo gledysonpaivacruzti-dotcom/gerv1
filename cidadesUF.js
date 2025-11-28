@@ -1230,6 +1230,7 @@ const cidadesUF = {
   "Forquilha": "CE",
   "Forquilhinha": "SC",
   "Fortaleza": "CE",
+  "Pecem": "CE",
   "Fortaleza Do Tabocao": "TO",
   "Fortaleza Dos Valos": "RS",
   "Fortim": "CE",
