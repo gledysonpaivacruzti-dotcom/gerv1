@@ -229,8 +229,6 @@ function gerarDescricao(){
     partes.push(backbone, uf, evento);
     if (evento === "IND") partes.push(canal);
     partes.push(cidadesDescr, via, parceiro);
-    if (evento === "SWAP") partes.push(canal);
-    partes.push(cidadesDescr, via, parceiro);
   }
 
   descricao = partes.join("::");
