@@ -129,19 +129,49 @@
       <div><label for="evento">Tipo de Evento</label>
         <select id="evento">
           <option value="RUP">Ruptura</option>
-          <option value="SWAP">SWAP de Canal</option>
           <option value="ATN">Atenuação</option>
           <option value="IND">Indisponibilidade</option>
+          <option value="SWP">Swap</option>
           <option value="DEG">Degradação</option>
           <option value="FDH">Falha de Hardware</option>
           <option value="TPR">Temperatura</option>
           <option value="OSC">Oscilação</option>
         </select>
       </div>
-      <div id="canal-container" style="display:none"><label for="canal">Canal Afetado</label><select id="canal"><script>for(let i=20;i<=60;i++){document.write(`<option value="CH${i}">CH${i}</option>`);}</script></select></div>
-      <div><label for="via">Via</label><select id="via"><option value="ONLY">Only</option><option value="WORK">Work</option><option value="PROTECT">Protect</option></select></div>
-      <div><label for="parceiro">Parceiro</label><select id="parceiro"><option value="STAR1">STAR1</option><option value="JUPITER">JUPITER</option><option value="TELFO">TELFO</option><option value="BRASILINK">BRASILINK</option><option value="GIGA+">GIGA+</option><option value="SOBRALNET">SOBRALNET</option><option value="MEGALINK">MEGALINK</option><option value="ONLINE">ONLINE</option><option value="LOOP TELECOM">LOOP TELECOM</option></select></div>
-      <div><label for="acionamento">Acionamento</label>
+      <div id="canal-container" style="display:none">
+        <label for="canal">Canal Afetado</label>
+        <select id="canal">
+          <script>
+            for(let i=20;i<=60;i++){
+              document.write(`<option value="CH${i}">CH${i}</option>`);
+            }
+          </script>
+        </select>
+      </div>
+      <div>
+        <label for="via">Via</label>
+        <select id="via">
+          <option value="ONLY">Only</option>
+          <option value="WORK">Work</option>
+          <option value="PROTECT">Protect</option>
+        </select>
+      </div>
+      <div>
+        <label for="parceiro">Parceiro</label>
+        <select id="parceiro">
+          <option value="STAR1">STAR1</option>
+          <option value="JUPITER">JUPITER</option>
+          <option value="TELFO">TELFO</option>
+          <option value="BRASILINK">BRASILINK</option>
+          <option value="GIGA+">GIGA+</option>
+          <option value="SOBRALNET">SOBRALNET</option>
+          <option value="MEGALINK">MEGALINK</option>
+          <option value="ONLINE">ONLINE</option>
+          <option value="LOOP TELECOM">LOOP TELECOM</option>
+        </select>
+      </div>
+      <div>
+        <label for="acionamento">Acionamento</label>
         <select id="acionamento">
           <option value="REA">Reativo</option>
           <option value="PRO" selected>Proativo</option>
@@ -186,10 +216,10 @@ function isSingleCityEvent(evt) {
 
 function updateFieldVisibility(){
   const evento = document.getElementById("evento").value;
-  const isIND = evento === "IND";
+  const requiresChannel = evento === "IND" || evento === "SWP";
   const isSingle = isSingleCityEvent(evento);
 
-  document.getElementById("canal-container").style.display = isIND ? "block" : "none";
+  document.getElementById("canal-container").style.display = requiresChannel ? "block" : "none";
   document.getElementById("pontaFalha-container").style.display = isSingle ? "block" : "none";
   document.getElementById("pontaA-container").style.display = isSingle ? "none" : "block";
   document.getElementById("pontaB-container").style.display = isSingle ? "none" : "block";
@@ -227,7 +257,7 @@ function gerarDescricao(){
     const cidadesDescr = `${normalize(cidades[0])}<>${normalize(cidades[1])}`;
     if (acionamento) partes.push(acionamento);
     partes.push(backbone, uf, evento);
-    if (evento === "IND") partes.push(canal);
+    if (evento === "IND" || evento === "SWP") partes.push(canal);
     partes.push(cidadesDescr, via, parceiro);
   }
 
