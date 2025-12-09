@@ -118,20 +118,38 @@
       <img src="safe.png" alt="safe" style="max-width: 30%; border-radius: 8px; display: block; margin: 0 auto;" />
     </a>
     <div class="grid">
-      <div id="pontaA-container"><label for="pontaA">Ponta A</label><input list="cidades" id="pontaA" placeholder="Ex: Fortaleza" /></div>
-      <div id="pontaB-container"><label for="pontaB">Ponta B</label><input list="cidades" id="pontaB" placeholder="Ex: Teresina" /></div>
-      <div id="pontaFalha-container" style="display:none"><label for="pontaFalha">Ponta de Falha</label><input list="cidades" id="pontaFalha" placeholder="Ex: Fortaleza" /></div>
+      <div id="pontaA-container">
+        <label for="pontaA">Ponta A</label>
+        <input list="cidades" id="pontaA" placeholder="Ex: Fortaleza" />
+      </div>
+      <div id="pontaB-container">
+        <label for="pontaB">Ponta B</label>
+        <input list="cidades" id="pontaB" placeholder="Ex: Teresina" />
+      </div>
+      <div id="pontaFalha-container" style="display:none">
+        <label for="pontaFalha">Ponta de Falha</label>
+        <input list="cidades" id="pontaFalha" placeholder="Ex: Fortaleza" />
+      </div>
 
       <datalist id="cidades"></datalist>
 
-      <div><label for="uf">UF</label><input type="text" id="uf" readonly /></div>
-      <div><label for="backbone">Backbone</label><select id="backbone"><option value="DWDM">DWDM</option><option value="METRO">METRO</option></select></div>
-      <div><label for="evento">Tipo de Evento</label>
+      <div>
+        <label for="uf">UF</label>
+        <input type="text" id="uf" readonly />
+      </div>
+      <div>
+        <label for="backbone">Backbone</label>
+        <select id="backbone">
+          <option value="DWDM">DWDM</option>
+          <option value="METRO">METRO</option>
+        </select>
+      </div>
+      <div>
+        <label for="evento">Tipo de Evento</label>
         <select id="evento">
           <option value="RUP">Ruptura</option>
           <option value="ATN">Atenuação</option>
           <option value="IND">Indisponibilidade</option>
-          <option value="SWP">Swap</option>
           <option value="DEG">Degradação</option>
           <option value="FDH">Falha de Hardware</option>
           <option value="TPR">Temperatura</option>
@@ -146,6 +164,14 @@
               document.write(`<option value="CH${i}">CH${i}</option>`);
             }
           </script>
+        </select>
+      </div>
+      <div>
+        <label for="swap">Swap</label>
+        <select id="swap">
+          <option value="NONE" selected>Nenhum</option>
+          <option value="CANAL">Swap de Canal</option>
+          <option value="FIBRA">Swap de Fibra</option>
         </select>
       </div>
       <div>
@@ -178,7 +204,9 @@
         </select>
       </div>
     </div>
-    <div id="alerta" class="full-width">Rompimento em trecho com RAMAN. O mesmo deve ser desligado para evitar danos ao equipamento.</div>
+    <div id="alerta" class="full-width">
+      Rompimento em trecho com RAMAN. O mesmo deve ser desligado para evitar danos ao equipamento.
+    </div>
     <div id="descricao"></div>
     <button id="copiarBtn" onclick="copiarDescricao()" disabled>📋 Copiar Descrição</button>
 
@@ -197,7 +225,7 @@ for (const [cidade, uf] of Object.entries(cidadesUF)) {
   document.getElementById("cidades").appendChild(option);
 }
 
-const campos = ["pontaA","pontaB","pontaFalha","backbone","evento","canal","via","parceiro","acionamento"];
+const campos = ["pontaA","pontaB","pontaFalha","backbone","evento","canal","swap","via","parceiro","acionamento"];
 campos.forEach(id => {
   const el = document.getElementById(id);
   if (!el) return;
@@ -210,13 +238,19 @@ document.getElementById("evento").addEventListener("change", () => {
   gerarDescricao();
 });
 
+document.getElementById("swap").addEventListener("change", () => {
+  updateFieldVisibility();
+  gerarDescricao();
+});
+
 function isSingleCityEvent(evt) {
   return evt === "TPR" || evt === "FDH";
 }
 
 function updateFieldVisibility(){
   const evento = document.getElementById("evento").value;
-  const requiresChannel = evento === "IND" || evento === "SWP";
+  const swap = document.getElementById("swap").value;
+  const requiresChannel = (evento === "IND") || (swap === "CANAL");
   const isSingle = isSingleCityEvent(evento);
 
   document.getElementById("canal-container").style.display = requiresChannel ? "block" : "none";
@@ -231,6 +265,7 @@ function gerarDescricao(){
   const via = document.getElementById("via").value;
   const parceiro = document.getElementById("parceiro").value.toUpperCase();
   const acionamento = document.getElementById("acionamento").value;
+  const swap = document.getElementById("swap").value;
 
   const normalize = c => c.toUpperCase().replace(/\s+/g,'_');
 
@@ -240,25 +275,52 @@ function gerarDescricao(){
 
   if (isSingleCityEvent(evento)) {
     const cidade = document.getElementById("pontaFalha").value.trim();
-    if (!cidade) { document.getElementById("descricao").textContent = ""; toggleBotao(false); return; }
+    if (!cidade) {
+      document.getElementById("descricao").textContent = "";
+      toggleBotao(false);
+      return;
+    }
     uf = cidadesUFMap[cidade.toLowerCase()] || "";
     document.getElementById("uf").value = uf;
     const locSegment = normalize(cidade);
     if (acionamento) partes.push(acionamento);
     partes.push(backbone, uf, evento, locSegment, via, parceiro);
+
+    if (swap === "CANAL") {
+      partes.push("SWAP_CANAL");
+    } else if (swap === "FIBRA") {
+      partes.push("SWAP_FIBRA");
+    }
   } else {
     const cidadeA = document.getElementById("pontaA").value.trim();
     const cidadeB = document.getElementById("pontaB").value.trim();
     const canal = document.getElementById("canal").value;
-    if (!cidadeA || !cidadeB) { document.getElementById("descricao").textContent = ""; toggleBotao(false); return; }
+
+    if (!cidadeA || !cidadeB) {
+      document.getElementById("descricao").textContent = "";
+      toggleBotao(false);
+      return;
+    }
+
     const cidades = [cidadeA, cidadeB].sort((a,b)=>a.localeCompare(b));
     uf = cidadesUFMap[cidades[0].toLowerCase()] || "";
     document.getElementById("uf").value = uf;
     const cidadesDescr = `${normalize(cidades[0])}<>${normalize(cidades[1])}`;
+
     if (acionamento) partes.push(acionamento);
     partes.push(backbone, uf, evento);
-    if (evento === "IND" || evento === "SWP") partes.push(canal);
+
+    if (evento === "IND" || swap === "CANAL") {
+      partes.push(canal);
+    }
+
     partes.push(cidadesDescr, via, parceiro);
+
+    if (swap === "CANAL") {
+      partes.push("SWAP_CANAL");
+    } else if (swap === "FIBRA") {
+      partes.push("SWAP_FIBRA");
+    }
   }
 
   descricao = partes.join("::");
