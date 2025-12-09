@@ -148,6 +148,8 @@
         <label for="evento">Tipo de Evento</label>
         <select id="evento">
           <option value="RUP">Ruptura</option>
+          <option value="RUP_SWAP_CANAL">Ruptura – Swap de Canal</option>
+          <option value="RUP_SWAP_FIBRA">Ruptura – Swap de Fibra</option>
           <option value="ATN">Atenuação</option>
           <option value="IND">Indisponibilidade</option>
           <option value="DEG">Degradação</option>
@@ -160,18 +162,10 @@
         <label for="canal">Canal Afetado</label>
         <select id="canal">
           <script>
-            for(let i=20;i<=60;i++){
+            for (let i = 20; i <= 60; i++) {
               document.write(`<option value="CH${i}">CH${i}</option>`);
             }
           </script>
-        </select>
-      </div>
-      <div>
-        <label for="swap">Swap</label>
-        <select id="swap">
-          <option value="NONE" selected>Nenhum</option>
-          <option value="CANAL">Swap de Canal</option>
-          <option value="FIBRA">Swap de Fibra</option>
         </select>
       </div>
       <div>
@@ -225,7 +219,18 @@ for (const [cidade, uf] of Object.entries(cidadesUF)) {
   document.getElementById("cidades").appendChild(option);
 }
 
-const campos = ["pontaA","pontaB","pontaFalha","backbone","evento","canal","swap","via","parceiro","acionamento"];
+const campos = [
+  "pontaA",
+  "pontaB",
+  "pontaFalha",
+  "backbone",
+  "evento",
+  "canal",
+  "via",
+  "parceiro",
+  "acionamento"
+];
+
 campos.forEach(id => {
   const el = document.getElementById(id);
   if (!el) return;
@@ -238,19 +243,20 @@ document.getElementById("evento").addEventListener("change", () => {
   gerarDescricao();
 });
 
-document.getElementById("swap").addEventListener("change", () => {
-  updateFieldVisibility();
-  gerarDescricao();
-});
-
 function isSingleCityEvent(evt) {
+  // Eventos de cidade única continuam os mesmos
   return evt === "TPR" || evt === "FDH";
+}
+
+// Eventos que são ruptura (base RUP)
+function isRupturaVariant(evt) {
+  return evt === "RUP" || evt === "RUP_SWAP_CANAL" || evt === "RUP_SWAP_FIBRA";
 }
 
 function updateFieldVisibility(){
   const evento = document.getElementById("evento").value;
-  const swap = document.getElementById("swap").value;
-  const requiresChannel = (evento === "IND") || (swap === "CANAL");
+  const requiresChannel =
+    evento === "IND" || evento === "RUP_SWAP_CANAL";
   const isSingle = isSingleCityEvent(evento);
 
   document.getElementById("canal-container").style.display = requiresChannel ? "block" : "none";
@@ -261,11 +267,13 @@ function updateFieldVisibility(){
 
 function gerarDescricao(){
   const backbone = document.getElementById("backbone").value;
-  const evento = document.getElementById("evento").value;
+  const eventoOriginal = document.getElementById("evento").value;
   const via = document.getElementById("via").value;
   const parceiro = document.getElementById("parceiro").value.toUpperCase();
   const acionamento = document.getElementById("acionamento").value;
-  const swap = document.getElementById("swap").value;
+
+  // Evento base para a string: RUP para todas variações de ruptura
+  const evento = isRupturaVariant(eventoOriginal) ? "RUP" : eventoOriginal;
 
   const normalize = c => c.toUpperCase().replace(/\s+/g,'_');
 
@@ -273,7 +281,7 @@ function gerarDescricao(){
   let uf = "";
   let descricao = "";
 
-  if (isSingleCityEvent(evento)) {
+  if (isSingleCityEvent(eventoOriginal)) {
     const cidade = document.getElementById("pontaFalha").value.trim();
     if (!cidade) {
       document.getElementById("descricao").textContent = "";
@@ -286,9 +294,10 @@ function gerarDescricao(){
     if (acionamento) partes.push(acionamento);
     partes.push(backbone, uf, evento, locSegment, via, parceiro);
 
-    if (swap === "CANAL") {
+    // Swap markers para ruptura de fibra/canal em eventos single-city (se um dia você usar)
+    if (eventoOriginal === "RUP_SWAP_CANAL") {
       partes.push("SWAP_CANAL");
-    } else if (swap === "FIBRA") {
+    } else if (eventoOriginal === "RUP_SWAP_FIBRA") {
       partes.push("SWAP_FIBRA");
     }
   } else {
@@ -310,15 +319,17 @@ function gerarDescricao(){
     if (acionamento) partes.push(acionamento);
     partes.push(backbone, uf, evento);
 
-    if (evento === "IND" || swap === "CANAL") {
+    // Canal obrigatório em IND e em Ruptura – Swap de Canal
+    if (eventoOriginal === "IND" || eventoOriginal === "RUP_SWAP_CANAL") {
       partes.push(canal);
     }
 
     partes.push(cidadesDescr, via, parceiro);
 
-    if (swap === "CANAL") {
+    // Marca de swap ao final da string
+    if (eventoOriginal === "RUP_SWAP_CANAL") {
       partes.push("SWAP_CANAL");
-    } else if (swap === "FIBRA") {
+    } else if (eventoOriginal === "RUP_SWAP_FIBRA") {
       partes.push("SWAP_FIBRA");
     }
   }
@@ -342,6 +353,7 @@ function copiarDescricao(){
   });
 }
 
+// Inicializa visibilidade correta
 updateFieldVisibility();
 gerarDescricao();
 </script>
