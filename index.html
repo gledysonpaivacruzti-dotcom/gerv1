@@ -151,7 +151,7 @@
         <label for="evento">Tipo de Evento</label>
         <select id="evento">
           <option value="RUP">Ruptura</option>
-          <option value="RUP_SWAP_CANAL">Ruptura – Swap de Canal</option>
+          <option value="RUP_SWAP_CANAL">Indisponibilidade – Swap de Canal</option>
           <option value="RUP_SWAP_FIBRA">Ruptura – Swap de Fibra</option>
           <option value="ATN">Atenuação</option>
           <option value="IND">Indisponibilidade</option>
@@ -328,7 +328,7 @@ function gerarDescricao() {
     // Insere SWAP_CANAL ou SWAP_FIBRA logo após o evento, se existir
     if (swapTag) partes.push(swapTag);
 
-    // Canal entra para IND normal ou Ruptura – Swap de Canal
+    // Canal entra para IND normal ou Indisponibilidade – Swap de Canal
     if (eventoOriginal === "IND" || eventoOriginal === "RUP_SWAP_CANAL") {
       partes.push(canal);
     }
