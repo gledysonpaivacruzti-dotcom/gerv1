@@ -3879,4 +3879,6 @@ const cidadesUF = {
 "São Bento": "MA",
   "Governador Nunes Freire": "MA",
   "Coroata": "MA",
+  "Maiobao": "MA",
+  "Maiobinha": "MA",
 };
